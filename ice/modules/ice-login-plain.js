@@ -15,6 +15,7 @@
 /*global loginTimeout */
 /*global quit */
 /*global storeCookies */
+/*global getOtp */
 /*global main */
 
 /**
@@ -83,8 +84,17 @@ function checkLogin() {
     }
 
     if (page.url.substring(0,44) === 'https://accounts.google.com/signin/challenge') {
-      announce('Using two-step verification, please enter your code:');
-      twostep = system.stdin.readLine();
+      if (config.otpsecret) {
+        twostep = getOtp(config.otpsecret);
+        if (twostep === null) {
+          quit('Unable to retrieve OTP necessary for necessary two-step verfication');
+        } else {
+          announce('Using two-step verification, using calculcated OTP: ' + twostep);
+        }
+      } else {
+        announce('Using two-step verification, please enter your code:');
+        twostep = system.stdin.readLine();
+      }
     }
 
     if (twostep) {
