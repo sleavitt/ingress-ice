@@ -44,9 +44,9 @@ function getDateTime(format) {
   }
   var dateTime;
   if (format === 1) {
-    dateTime = year + '-' + month + '-' + day + '--' + hour + '-' + minute + '-' + second;
+    dateTime = year + '-' + month + '-' + day + '  ' + hour + '-' + minute + '-' + second;
   } else {
-    dateTime = day + '.' + month + '.' + year + ' '+hour+':'+minute+':'+second;
+    dateTime = day + '.' + month + '.' + year + ' ' + hour + ':' + minute + ':' + second;
   }
   return dateTime;
 }

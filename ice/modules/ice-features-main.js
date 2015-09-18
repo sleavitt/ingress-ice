@@ -27,7 +27,7 @@
 */
 function s() {
   announce('Screen saved');
-  page.render(folder + 'ice-' + getDateTime(1) + '.png');
+  page.render(folder + 'ice-' + getDateTime(1).replace(/\s/g, '-') + '.png');
 }
 
 /**
@@ -168,7 +168,7 @@ function main() {
   }
   window.setTimeout(function () {
     if (config.timestamp) {
-      addTimestamp(getDateTime(), config.iitc);
+      addTimestamp(getDateTime(config.timestampformat), config.iitc);
     }
     s();
   }, 2000);
