@@ -56,12 +56,18 @@ function getDateTime(format) {
 * @param {String} err - the error text
 */
 function quit(err) {
+  var exitCode;
+
   if (err) {
     announce('ICE crashed. Reason: ' + err + ' :(');
+    exitCode = 1;
   } else {
     announce('Quit');
+    exitCode = 0;
   }
-  phantom.exit();
+
+  setTimeout(function(){ phantom.exit(exitCode); }, 0);
+  phantom.onError = function(){};
 }
 
 /**
