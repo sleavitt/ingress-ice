@@ -170,7 +170,9 @@ function main() {
     if (config.timestamp) {
       addTimestamp(getDateTime(config.timestampformat), config.iitc);
     }
+    if (typeof config.beforeScreenshot == 'function') config.beforeScreenshot();
     s();
+    if (typeof config.afterScreenshot == 'function') config.afterScreenshot();
   }, 2000);
 }
 

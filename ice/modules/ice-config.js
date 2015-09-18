@@ -114,21 +114,39 @@ function initialConfiguration() {
 function configure(path) {
   var settings = {};
   var settingsfile = fs.open(path, 'r');
-  while(!settingsfile.atEnd()) {
+
+  var funcKeys = ['beforeScreenshot', 'afterScreenshot'];
+  var funcReg = /function *\(([^()]*)\)[ \n\t]*{(.*)}/gmi;
+  var match;
+
+  while (!settingsfile.atEnd()) {
     var line = settingsfile.readLine();
     if (!(line[0] === '#' || line[0] === '[' || line.indexOf('=', 1) === -1)) {
       var pos = line.indexOf('=', 1);
       var key = line.substring(0,pos);
       var value = line.substring(pos + 1);
-      if (value == 'false') {
+      if (value == 'true') {
+        settings[key] = true;
+      } else if (value == 'false') {
         settings[key] = false;
       } else if (/^-?[\d.]+(?:e-?\d+)?$/.test(value) && value !== '') {
         settings[key] = parseInt(value, 10);
+      } else if (funcKeys.indexOf(key) !== -1) {
+        match = funcReg.exec(value.replace(/\n/g, ' '));
+
+        value = null;
+        if (match) {
+          value = new Function(match[1].split(','), match[2]);
+        }
+
+        settings[key] = value;
       } else {
         settings[key] = value;
       }
     }
   }
+
   settingsfile.close();
+
   return settings;
 }
