@@ -7,67 +7,103 @@
 /*global quit */
 /*global args */
 
-var cookiespath = '.iced_cookies';
-var config = configure(args[1]);
 
-// Check if no login/password/link provided
-if (config.login === '' || config.password === '' || config.area === '') {
-  quit('No login/password/area link specified. You need to reconfigure ice:\n - Double-click reconfigure.cmd on Windows;\n - Start ./ingress-ice -r on Linux/Mac OS X/*BSD;');
-}
+/*global cookiespath */
+var cookiespath;
 
-var folder = fs.workingDirectory + '/';
-var ssnum = 0;
-if (args[2]) {
-  ssnum = parseInt(args[2], 10);
-}
+/*global config */
+var config;
 
-var configver = (config.SACSID === '' || config.SACSID === undefined) ? 1 : 2;
+/*global folder */
+var folder;
 
-/**
-* Counter for number of screenshots
-*/
-var curnum       = 0;
+/*global ssnum */
+var ssnum;
 
+/*global configver */
+var configver;
 
-/**
-* Delay between logging in and checking if successful
-* @default
-*/
-var loginTimeout = 10 * 1000;
+/*global curnum */
+var curnum;
 
-/**
-* twostep auth trigger
-*/
-var twostep      = 0;
-var webpage      = require('webpage');
-var page         = webpage.create();
-page.onConsoleMessage = function () {};
-page.onError  = function () {};
+/*global loginTimeout */
+var loginTimeout;
 
-/**
-* aborting unnecessary API
-* @since 4.0.0
-* @author c2nprds
-*/
-page.onResourceRequested = function(requestData, request) {
-  if (requestData.url.match(/(getGameScore|getPlexts|getPortalDetails)/g)) {
-    request.abort();
+/*global twostep */
+var twostep;
+
+/*global webpage */
+var webpage;
+
+/*global page */
+var page;
+
+function initialConfiguration() {
+  // Path to cookies file
+  cookiespath = '.iced_cookies';
+
+  // Parse the configuration
+  config = configure(args[1]);
+
+  // Check if no login/password/area link provided
+  if (!config.login || !config.password || !config.area) {
+    quit('No login/password/area link specified. You need to reconfigure ice:\n - Double-click reconfigure.cmd on Windows;\n - Start ./ingress-ice -r on Linux/Mac OS X/*BSD;');
   }
-};
 
-//page.settings.userAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36';
+  // Create the folder variable
+  folder = fs.workingDirectory + '/';
 
-/** @function setVieportSize */
-if (!config.iitc) {
-  page.viewportSize = {
-    width: config.width + 42,
-    height: config.height + 167
+  // Calculate number of screenshots to take
+  ssnum = 0;
+  if (args[2]) {
+    ssnum = parseInt(args[2], 10);
+  }
+
+  // Determine the version of the supplied configuration
+  configver = (config.SACSID === '' || config.SACSID === undefined) ? 1 : 2;
+
+  // Counter for number of screenshots
+  curnum = 0;
+
+  // Delay between logging in and checking if successful
+  loginTimeout = 10 * 1000;
+
+  // twostep auth trigger
+  twostep = 0;
+
+  // Initialize phantomjs so we can get started
+  webpage = require('webpage');
+  page    = webpage.create();
+
+  // Suppress console and error messages
+  page.onConsoleMessage = function () {};
+  page.onError  = function () {};
+
+  /**
+  * aborting unnecessary API
+  * @since 4.0.0
+  * @author c2nprds
+  */
+  page.onResourceRequested = function(requestData, request) {
+    if (requestData.url.match(/(getGameScore|getPlexts|getPortalDetails)/g)) {
+      request.abort();
+    }
   };
-} else {
-  page.viewportSize = {
-    width: config.width,
-    height: config.height
-  };
+
+  //page.settings.userAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36';
+
+  /** @function setViewportSize */
+  if (!config.iitc) {
+    page.viewportSize = {
+      width: config.width + 42,
+      height: config.height + 167
+    };
+  } else {
+    page.viewportSize = {
+      width: config.width,
+      height: config.height
+    };
+  }
 }
 
 /**
