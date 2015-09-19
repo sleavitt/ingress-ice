@@ -44,7 +44,7 @@ launch() {
       notify-send "Ingress Ice" "ICE is running"
     fi
     ARGS="$1 $2"
-    $PHANTOMJS $3 "$SCRIPT_HOME/ice/ice.js" $ARGS; exit;
+    $PHANTOMJS ${EXEPARAMS[@]} "$SCRIPT_HOME/ice/ice.js" $ARGS; exit;
   else
     if [ ! $TEXT ]; then
       $DIALOG --backtitle "Automatic screenshooter for ingress intel map" --title "Ingress Ice" --clear \
@@ -159,4 +159,5 @@ if [ -z "$COUNT" ]; then
   COUNT=0
 fi
 
-launch $NFILE $COUNT $@
+EXEPARAMS=$@
+launch $NFILE $COUNT
