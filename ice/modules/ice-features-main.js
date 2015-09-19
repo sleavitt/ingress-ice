@@ -38,7 +38,7 @@ function s() {
 function count() {
   if ((curnum >= ssnum)&&(ssnum !== 0)) {
     announce('Finished sucessfully. Exiting...\nThanks for using ingress-ice!');
-    phantom.exit();
+    quit();
   } else if (ssnum !== 0) {
     announce('Screen #' + (curnum + 1) + '/' + ssnum + ' captured');
     curnum++;
