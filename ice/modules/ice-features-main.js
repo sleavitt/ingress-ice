@@ -36,12 +36,12 @@ function s() {
 * @var {number} ssnum
 */
 function count() {
-  if ((curnum >= ssnum)&&(ssnum !== 0)) {
-    announce('Finished sucessfully. Exiting...\nThanks for using ingress-ice!');
-    quit();
-  } else if (ssnum !== 0) {
-    announce('Screen #' + (curnum + 1) + '/' + ssnum + ' captured');
-    curnum++;
+  if (ssnum > 0) {
+    announce('Screen #' + (++curnum) + '/' + ssnum + ' captured');
+    if ((curnum >= ssnum) && (ssnum !== 0)) {
+      announce('Finished successfully. Exiting...\nThanks for using ingress-ice!');
+      quit();
+    }
   }
 }
 
@@ -149,7 +149,6 @@ function humanPresence() {
 * Main function. Wrapper for others.
 */
 function main() {
-  count();
   if (config.timestamp) {
     page.evaluate(function () {
       if (document.getElementById('watermark-ice')) {
@@ -173,6 +172,7 @@ function main() {
     if (typeof config.beforeScreenshot == 'function') config.beforeScreenshot();
     s();
     if (typeof config.afterScreenshot == 'function') config.afterScreenshot();
+    count();
   }, 2000);
 }
 
