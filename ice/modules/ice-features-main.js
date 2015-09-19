@@ -149,6 +149,15 @@ function humanPresence() {
 * Main function. Wrapper for others.
 */
 function main() {
+  var isInitial = arguments[0];
+  if (isInitial) {
+    if (config.skipInitial) {
+      return;
+    } else {
+      announce('The first screenshot may not contain all portals, it is intended for you to check framing.');
+    }
+  }
+
   if (config.timestamp) {
     page.evaluate(function () {
       if (document.getElementById('watermark-ice')) {

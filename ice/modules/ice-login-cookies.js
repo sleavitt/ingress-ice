@@ -72,8 +72,7 @@ function afterCookieLogin() {
       }
       hideDebris(config.iitc);
       prepare(config.iitc, config.width, config.height);
-      announce('The first screenshot may not contain all portals, it is intended for you to check framing.');
-      main();
+      main(true);
       setInterval(main, config.delay);
     }, loginTimeout);
   });
