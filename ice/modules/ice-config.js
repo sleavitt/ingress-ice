@@ -116,7 +116,7 @@ function configure(path) {
   var settingsfile = fs.open(path, 'r');
 
   var funcKeys = ['beforeScreenshot', 'afterScreenshot'];
-  var funcReg = /function *\(([^()]*)\)[ \n\t]*{(.*)}/gmi;
+  var funcReg;
   var match;
 
   while (!settingsfile.atEnd()) {
@@ -125,14 +125,9 @@ function configure(path) {
       var pos = line.indexOf('=', 1);
       var key = line.substring(0,pos);
       var value = line.substring(pos + 1);
-      if (value == 'true') {
-        settings[key] = true;
-      } else if (value == 'false') {
-        settings[key] = false;
-      } else if (/^-?[\d.]+(?:e-?\d+)?$/.test(value) && value !== '') {
-        settings[key] = parseInt(value, 10);
-      } else if (funcKeys.indexOf(key) !== -1) {
-        match = funcReg.exec(value.replace(/\n/g, ' '));
+      if (funcKeys.indexOf(key) !== -1) {
+        funcReg = /function\s*\(([^()]*)\)\s*{(.*)}/gi;
+        match = funcReg.exec(value);
 
         value = null;
         if (match) {
@@ -140,6 +135,12 @@ function configure(path) {
         }
 
         settings[key] = value;
+      } else if (value == 'true') {
+        settings[key] = true;
+      } else if (value == 'false') {
+        settings[key] = false;
+      } else if (/^-?[\d.]+(?:e-?\d+)?$/.test(value) && value !== '') {
+        settings[key] = parseInt(value, 10);
       } else {
         settings[key] = value;
       }
