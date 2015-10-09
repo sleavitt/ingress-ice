@@ -61,49 +61,61 @@ function addTimestamp(time, iitcz) {
 * @author Nikitakun
 */
 function addIitc() {
-  page.evaluate(function(field, link, res, enl, min, max) {
-    localStorage['ingress.intelmap.layergroupdisplayed'] = JSON.stringify({
-      "Unclaimed Portals":Boolean(min === 1),
-      "Level 1 Portals":Boolean(min === 1),
-      "Level 2 Portals":Boolean((min <= 2) && (max >= 2)),
-      "Level 3 Portals":Boolean((min <= 3) && (max >= 3)),
-      "Level 4 Portals":Boolean((min <= 4) && (max >= 4)),
-      "Level 5 Portals":Boolean((min <= 5) && (max >= 5)),
-      "Level 6 Portals":Boolean((min <= 6) && (max >= 6)),
-      "Level 7 Portals":Boolean((min <= 7) && (max >= 7)),
-      "Level 8 Portals":Boolean(max === 8),
-      "Fields":field,
-      "Links":link,
-      "Resistance":res,
-      "Enlightened":enl,
-      "DEBUG Data Tiles":false,
-      "Artifacts":true,
-      "Ornaments":true
-    });
-
-    var script = document.createElement('script');
-    script.type='text/javascript';
-    script.src='https://secure.jonatkins.com/iitc/release/total-conversion-build.user.js';
-    document.head.insertBefore(script, document.head.lastChild);
-  }, !config.hideField, !config.hideLink, !config.hideRes, !config.hideEnl, config.minlevel, config.maxlevel);
+  var iitcScripts = [{
+    'src': 'https://secure.jonatkins.com/iitc/release/total-conversion-build.user.js',
+    'params': {
+      'ingress.intelmap.layergroupdisplayed': {
+        'Unclaimed Portals': Boolean(config.minlevel === 1),
+        'Level 1 Portals': Boolean(config.minlevel === 1),
+        'Level 2 Portals': Boolean((config.minlevel <= 2) && (config.maxlevel >= 2)),
+        'Level 3 Portals': Boolean((config.minlevel <= 3) && (config.maxlevel >= 3)),
+        'Level 4 Portals': Boolean((config.minlevel <= 4) && (config.maxlevel >= 4)),
+        'Level 5 Portals': Boolean((config.minlevel <= 5) && (config.maxlevel >= 5)),
+        'Level 6 Portals': Boolean((config.minlevel <= 6) && (config.maxlevel >= 6)),
+        'Level 7 Portals': Boolean((config.minlevel <= 7) && (config.maxlevel >= 7)),
+        'Level 8 Portals': Boolean(config.maxlevel === 8),
+        'Fields': !config.hideField,
+        'Links': !config.hideLink,
+        'Resistance': !config.hideRes,
+        'Enlightened': !config.hideEnl,
+        'DEBUG Data Tiles': false,
+        'Artifacts': true,
+        'Ornaments': true
+      }
+    }
+  }];
 
   if (config.plugins) {
     plugins = JSON.parse(config.plugins);
     plugins.forEach(function(plugin) {
-      loadIITCplugin(plugin.src, plugin.params);
+      iitcScripts.push(plugin);
     });
   }
-}
 
-function loadIITCplugin(src, params) {
-  page.evaluate(function(src, params) {
-    params.forEach(function(param) {
-      localStorage[param.key] = param.value;
+  page.evaluate(function(iitcScripts) {
+    iitcScripts.forEach(function(iitcScript) {
+      if (iitcScript) {
+        if (iitcScript.params) {
+          Object.keys(iitcScript.params).forEach(function(key) {
+            localStorage[key] = JSON.stringify(iitcScript.params[key]);
+          });
+        }
+
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = iitcScript.src;
+        document.body.appendChild(script);
+      }
     });
+  }, iitcScripts);
 
-    var script = document.createElement('script');
-    script.type='text/javascript';
-    script.src=src;
-    document.head.insertBefore(script, document.head.lastChild);
-  }, src, params);
+  waitFor(function() {
+    return page.evaluate(function() {
+      return window.iitcLoaded === true;
+    });
+  }, function() {
+    announce('IITC finished loading');
+  }, function() {
+    announce('IITC failed to load in a timely manner');
+  }, 30000);
 }

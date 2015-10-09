@@ -77,3 +77,32 @@ function greet() {
   console.log('\n     _____ )   ___      _____) \n    (, /  (__/_____)  /        \n      /     /         )__      \n  ___/__   /        /          \n(__ /     (______) (_____)  v' + version + '\n\nIf you need help or want a new feature, visit https://github.com/nibogd/ingress-ice/issues');
 }
 
+/**
+* WaitFor.js from phantomjs.org
+* modified to add an optional onTimeout condition as well
+*/
+function waitFor(testFx, onReady, onTimeout, timeOutMillis) {
+  var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 3000, //< Default Max Timout is 3s
+    start = new Date().getTime(),
+    condition = false,
+    interval = setInterval(function() {
+      if ( (new Date().getTime() - start < maxtimeOutMillis) && !condition ) {
+        // If not time-out yet and condition not yet fulfilled
+        condition = (typeof(testFx) === "string" ? eval(testFx) : testFx()); //< defensive code
+      } else {
+        if(!condition) {
+          // If condition still not fulfilled (timeout but condition is 'false')
+          console.log("'waitFor()' timeout");
+          clearInterval(interval); //< Stop this interval
+          if (onTimeout) {
+            typeof(onTimeout) === "string" ? eval(onTimeout) : onTimeout(); //< Do what it's supposed to do if we've timed out
+          }
+        } else {
+          // Condition fulfilled (timeout and/or condition is 'true')
+          console.log("'waitFor()' finished in " + (new Date().getTime() - start) + "ms.");
+          clearInterval(interval); //< Stop this interval
+          typeof(onReady) === "string" ? eval(onReady) : onReady(); //< Do what it's supposed to do once the condition is fulfilled
+        }
+      }
+    }, 250); //< repeat check every 250ms
+};
